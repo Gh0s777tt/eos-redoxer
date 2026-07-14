@@ -1,126 +1,32 @@
-# redoxer
+# eos-redoxer
 
-The tool used to build/run Rust programs (and C/C++ programs with zero dependencies) inside of a Redox VM, the Redox GitLab CI use a Docker image with `redoxer` pre-installed.
+**E-OS fork of [`redox-os/redoxer`](https://gitlab.redox-os.org/redox-os/redoxer).** Part of the [**E-OS**](https://github.com/Gh0s777tt/E-OS) ecosystem — a hardened, Crimson-branded downstream of [Redox OS](https://www.redox-os.org).
 
-A pre-built Docker image can be found on [Docker Hub](https://hub.docker.com/r/redoxos/redoxer). Visit [the book for Continous Integration](https://doc.redox-os.org/book/ci.html) for more information.
+This repository is **Redoxer** — build/run/test Rust programs against Redox.
 
-## Options
+## E-OS changes vs upstream
 
-```
-redoxer env <command> [arguments]...
-    Run as command with env configured to run with the toolchain
-    The toolchain will be initialized by `redoxer toolchain`
-    Environment flags:
-        REDOXER_SYSROOT      Specify sysroot to link (default is target/$TARGET/sysroot on Cargo projects)
+_None yet_ — pinned to a clean upstream commit. E-OS branding and config for this component are applied via **recipe patches in the [main repo](https://github.com/Gh0s777tt/E-OS)**, not fork commits.
 
-redoxer <bench | build | check | doc | fetch | install | run | rustc | test> [-g|--gui] [-o|--output file] [--] [arguments]
-    Run as cargo passed by `redoxer env cargo`
-    Additionally set `redoxer exec` as test runner
+## How it's pinned
 
-redoxer <ar | cc | cxx> [arguments]
-    Run as GNU compiler passed by `redoxer env $GNU_TARGET-*`
+The E-OS build pins this fork in [`recipes/dev/redoxer/recipe.toml`](https://github.com/Gh0s777tt/E-OS/blob/main/recipes/dev/redoxer/recipe.toml):
 
-redoxer exec [-f|--folder folder] [-f|--folder folder:/path/in/redox] [-g|--gui] [-h|--help] [-i|--install-config] [-o|--output file] [--] <command> [arguments]...
-    Run a command inside QEMU, using a "base" or "gui" redox image, or provide custom one with --install-config
-    The redox image will be initialized if not exist or different with the specified --install-config
-    Specify a folder to copy it into /root inside redox image, or more generic one with folder:path
-    If folder for /root is not specified but <command> is a file, the file will be copied
-    Environment flags:
-        REDOXER_QEMU_BINARY   Override qemu binary
-        REDOXER_QEMU_ARGS     Override qemu args
-        REDOXER_USE_FUSE      [true|false] Override use fuse (default is automatically detected)
-    Notes:
-    - Setting REDOXER_QEMU_BINARY will print qemu commands to terminal
-    - Setting "-o -" will hide qemu serial output, only printing stdout/stderr from the command
+- branch **`master`** · rev **`a78d6b516ad5`**
+- **2 commit(s) behind** upstream master
 
-redoxer pkg [install|remove|update] pkg-1 pkg-2 ...
-    Install additional native packages for Cargo
-    Environment flags:
-        REDOXER_SYSROOT     Where to install sysroot (default is target/$TARGET/sysroot on Cargo projects)
-        REDOXER_PKG_SOURCE  Override source of packages (default is https://static.redox-os.org/pkg)
+## Build standalone
 
-redoxer toolchain [--update] [--url PATH]
-    Install or manage toolchain
-    Environment flags:
-        REDOXER_TOOLCHAIN   Override toolchain path
-```
+This fork is normally built by the E-OS cookbook (`make CI=1 …` in the [main repo](https://github.com/Gh0s777tt/E-OS)). To build it on its own you need the Redox toolchain; see the main repo's [build guide](https://github.com/Gh0s777tt/E-OS/blob/main/docs/building.md).
 
-## Commands
+## Hosting
 
-- Install the tool
+**GitLab (source of truth):** https://gitlab.com/e-os/eos-redoxer  
+**GitHub (read-only mirror):** https://github.com/Gh0s777tt/eos-redoxer
 
-```sh
-cargo install redoxer --locked
-```
+## License
 
-- Install the Redox toolchain
+MIT (inherited from upstream Redox). The E-OS project as a whole is AGPL-3.0; see the [main repo](https://github.com/Gh0s777tt/E-OS/blob/main/LICENSE).
 
-```sh
-redoxer toolchain
-```
-
-- Update the Redox toolchain using prebuilt toolchain from existing Redox OS Repo
-
-```sh
-make prefix
-redoxer toolchain --update --url .
-```
-
-- Build the Rust program or library with Redoxer
-
-```sh
-redoxer build
-```
-
-- Build the Rust program or library with additional native packages
-
-```sh
-redoxer pkg install xz
-redoxer build
-```
-
-
-- Run the Rust program on Redox
-
-```sh
-redoxer run
-```
-
-- Test the Rust program or library with Redoxer
-
-```sh
-redoxer test
-```
-
-- Run arbitrary executable (`echo hello`) with Redoxer
-
-```sh
-redoxer exec echo hello
-```
-
-## Host specific customizations
-
-`redoxer env` can be configured to compile host binaries by setting `TARGET` to the correct host target:
-
-+ `*-unknown-redox`
-+ `*-unknown-linux-gnu`
-+ `*-unknown-linux-musl`
-+ `*-unknown-freebsd`
-+ `*-apple-darwin`
-
-This feature is mainly used for [Redox build system](https://gitlab.redox-os.org/redox-os/redox). For other than Linux and Redox, you must supply additional environments to the correct paths or binary name for GCC and Binutils. You can also use it to specify other compiler or different version of GCC. Here's an example for using the system default, which also being the default values:
-
-```sh
-export REDOXER_HOST_AR=gcc-ar
-export REDOXER_HOST_AS=as
-export REDOXER_HOST_CC=cc
-export REDOXER_HOST_CXX=c++
-export REDOXER_HOST_LD=ld
-export REDOXER_HOST_NM=gcc-nm
-export REDOXER_HOST_OBJCOPY=objcopy
-export REDOXER_HOST_OBJDUMP=objdump
-export REDOXER_HOST_PKG_CONFIG=pkg-config
-export REDOXER_HOST_RANLIB=gcc-ranlib
-export REDOXER_HOST_READELF=readelf
-export REDOXER_HOST_STRIP=strip
-```
+---
+[E-OS main repo](https://github.com/Gh0s777tt/E-OS) · [Docs](https://github.com/Gh0s777tt/E-OS/tree/main/docs) · [Upstream](https://gitlab.redox-os.org/redox-os/redoxer)
